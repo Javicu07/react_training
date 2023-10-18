@@ -21,3 +21,9 @@ export function TwitterFollowCard ({ userName , name, isFollowing }) {
     </article>
   )
 }
+
+TwitterFollowCard.propTypes = {
+  userName: this.propTypes.string,
+  name: this.propTypes.string,
+  isFollowing: this.propTypes.boolean
+}
