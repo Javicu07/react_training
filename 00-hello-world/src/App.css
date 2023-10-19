@@ -47,7 +47,24 @@
   background-color: cornflowerblue;
 }
 
+.tw-followCard-text {
+  display: block;
+}
+
 .tw-followCard-button.is-following:hover {
   border: 1px solid tomato;
   background-color: tomato;
+  transition: .7s ease all;
+}
+
+.tw-followCard-button.is-following:hover .tw-followCard-text {
+  display: none;
+}
+
+.tw-followCard-button.is-following:hover .tw-followCard-stopFollow {
+  display: block;
+}
+
+.tw-followCard-stopFollow {
+  display: none;
 }
