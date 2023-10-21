@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import confetti from 'canvas-confetti'
 import './App.css'
 
 const TURNS = {
@@ -62,8 +63,8 @@ function App() {
     setWinner(null)
   }
 
-  const checkEndGame = (boardToCheck) => {
-    return boardToCheck.every(square => square !== null)
+  const checkEndGame = (newBoard) => {
+    return newBoard.every(square => square !== null)
   }
 
   const updateBoard = (index) => {
@@ -80,8 +81,11 @@ function App() {
 
     // checking for winners
     const newWinner = checkWinner(newBoard)
+    console.log('newBoard', newBoard)
+    console.log('newWinner', newWinner)
     if (newWinner) {
       setWinner(newWinner)
+      confetti()
     } else if (checkEndGame(newBoard)) {
       setWinner(false)
     }
@@ -93,14 +97,14 @@ function App() {
       <button onClick={resetGame}>Reset del juego</button>
       <section className='game'>
         {
-          board.map((square, index) => {
+          board.map((_, index) => {
             return(
               <Square 
                 key={index}
                 index={index}
                 updateBoard={updateBoard}
               >
-                {square}
+                {board[index]}
               </Square>
             )
           })
