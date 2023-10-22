@@ -52,9 +52,9 @@ function App() {
       ) {
         return boardToCheck[a]
       }
-      // no winner
-      return null
     }
+    // no winner
+    return null
   }
 
   const resetGame = () => {
@@ -81,8 +81,6 @@ function App() {
 
     // checking for winners
     const newWinner = checkWinner(newBoard)
-    console.log('newBoard', newBoard)
-    console.log('newWinner', newWinner)
     if (newWinner) {
       setWinner(newWinner)
       confetti()
