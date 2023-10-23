@@ -2,7 +2,7 @@ import { TURNS } from "../constants.js"
 
 import { Square } from "./Square.jsx"
 
-export const TurnChange = (turn) => {
+export const TurnChange = ({turn}) => {
   return(
     <section className='turn'>
     <Square isSelected={turn === TURNS.X}>
