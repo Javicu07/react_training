@@ -13,7 +13,12 @@ function App() {
     if(enabled) {
       window.addEventListener('pointermove', handleMove)
     }
+
+    return () => {
+      window.removeEventListener('pointermove', handleMove)
+    } // clean the effect
   }, [enabled])
+
   return (
     <main>
       <div style={{
