@@ -14,6 +14,8 @@ function App() {
       window.addEventListener('pointermove', handleMove)
     }
 
+    // --> it´s executed when the component is dismount
+    // --> when change the dependencies, before running the effect again
     return () => {
       window.removeEventListener('pointermove', handleMove)
     } // clean the effect
