@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react"
 
-function App() {
+const FollowMouse = () => {
   const [enabled, setEnabled] = useState(false)
   const [position, setPosition] = useState({ x: 0, y: 0})
 
+  // pointer move
   useEffect(() => {
     const handleMove = (event) => {
       const { clientX, clientY } = event
@@ -14,15 +15,30 @@ function App() {
       window.addEventListener('pointermove', handleMove)
     }
 
-    // --> it´s executed when the component is dismount
-    // --> when change the dependencies, before running the effect again
-    return () => {
+    // cleanup se ejecuta:
+    // --> cuando se desmonta el componente
+    // --> cuando cambian las dependencias, antes de ejecutar el efecto de nuevo
+    return () => { // --> cleanuo method
       window.removeEventListener('pointermove', handleMove)
     } // clean the effect
   }, [enabled])
 
+  // change body className
+  useEffect(() => {
+    document.body.classList.toggle('no-cursor', enabled)
+
+    return () => {
+      document.body.classList.remove('no-cursor')
+    }
+  }, [enabled])
+
+  // useEffect se ejecuta:
+  // [] --> solo se ejecuta una vez cuando se monta el componente
+  // [enabled] --> se ejecuta cuando cambia enabled y cuando se monta el componente
+  // undefined --> se ejecuta cada vez que se renderiza el componente
+
   return (
-    <main>
+    <>
       <div style={{
         position: 'absolute',
         backgroundColor: '#09f',
@@ -39,6 +55,14 @@ function App() {
       <button onClick={() => setEnabled(!enabled)}>
         {enabled ? 'Disable' : 'Enable'} Pointer Follower
       </button>
+    </>
+  )
+}
+
+function App() {
+  return(
+    <main>
+      <FollowMouse />  
     </main>
   )
 }
