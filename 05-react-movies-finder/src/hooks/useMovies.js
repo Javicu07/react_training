@@ -1,5 +1,5 @@
-import responseMovies from './mocks/with-results.json'
-import whitoutResults from './mocks/no-results.json'
+import responseMovies from '../mocks/with-results.json'
+import whitoutResults from '../mocks/no-results.json'
 
 export function useMovies () {
   const movies = responseMovies.Search
