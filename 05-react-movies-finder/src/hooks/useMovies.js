@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo } from 'react'
+import { useRef, useState, useMemo, useCallback } from 'react'
 import { searchMovies } from '../services/movies'
 
 export function useMovies ({ search, sort }) {
@@ -7,23 +7,41 @@ export function useMovies ({ search, sort }) {
   const [error, setError] = useState(null)
   const previousSearch = useRef(search) // --> guarda la busqueda anterior
 
-  const getMovies = useMemo(() => {
-    return async ({ search }) => {
-      if (search === previousSearch.current) return
+  // 'useCallback' hace lo mismo que 'useMemo' pero especificamente para funciones
+  // por debajo usa 'useMemo' pero solo se usa explicitamente para funciones
+  const getMovies = useCallback(async ({ search }) => {
+    if (search === previousSearch.current) return
 
-      try {
-        setLoading(true)
-        setError(null)
-        previousSearch.current = search // la referencia evita hacer una busqueda del mismo valor
-        const newMovies = await searchMovies({ search })
-        setMovies(newMovies)
-      } catch (e) {
-        setError(e.message)
-      } finally {
-        setLoading(false)
-      }
+    try {
+      setLoading(true)
+      setError(null)
+      previousSearch.current = search // la referencia evita hacer una busqueda del mismo valor
+      const newMovies = await searchMovies({ search })
+      setMovies(newMovies)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
     }
   }, [])
+
+  // const getMovies = useMemo(() => {
+  //  return async ({ search }) => {
+  //    if (search === previousSearch.current) return
+  //
+  //    try {
+  //      setLoading(true)
+  //      setError(null)
+  //      previousSearch.current = search // la referencia evita hacer una busqueda del mismo valor
+  //      const newMovies = await searchMovies({ search })
+  //      setMovies(newMovies)
+  //    } catch (e) {
+  //      setError(e.message)
+  //    } finally {
+  //      setLoading(false)
+  //    }
+  //  }
+  // }, [])
 
   // const getSortedMovies = () => {
   //  const sortedMovies = sort
