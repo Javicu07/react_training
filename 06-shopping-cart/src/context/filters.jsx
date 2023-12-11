@@ -1,5 +1,7 @@
 import { createContext, useState } from 'react'
 
+// Revisar que es Singleton, módulo de JavaScript
+
 // 1. Crear el Contexto. Este es el que tenemos que consumir
 export const FiltersContext = createContext()
 
