@@ -1,7 +1,8 @@
 import { EVENTS } from './consts.js'
 import { useState, useEffect } from 'react'
+import { match } from 'path-to-regexp'
 
-export function Router ({ routes = [], defaultComponent: DefaultComponent = () => <h1>404</h1> }) {
+export function Routers ({ routes = [], defaultComponent: DefaultComponent = () => <h1>404</h1> }) {
   const [currentPath, setCurrentPath] = useState(window.location.pathname)
 
   useEffect(() => {
@@ -19,9 +20,22 @@ export function Router ({ routes = [], defaultComponent: DefaultComponent = () =
     }
   }, [])
 
-  const Page = routes.find(({ path }) => path === currentPath)?.Component
+  let routeParams = {}
+
+  const Page = routes.find(({ path }) => {
+    if (path === currentPath) return true
+
+    const matcherUrl = match(path, { decode: decodeURIComponent })
+    const matched = matcherUrl(currentPath)
+    if (!matched) return false
+
+    routeParams = matched.params
+    return true
+  })?.Component
 
   return (
-    Page ? <Page /> : <DefaultComponent />
+    Page
+      ? <Page routeParams={routeParams} />
+      : <DefaultComponent routeParams={routeParams} />
   )
 }
