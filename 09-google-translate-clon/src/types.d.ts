@@ -12,8 +12,8 @@ export type FromLanguage = Language | AutoLanguage
 // de 'type', las interfaces son más fáciles de extender, lo que se suele hacer es que directamente
 // si es un objeto se utiliza un 'interface'
 export interface State {
-  fromLanguage: string
-  toLanguage: string
+  fromLanguage: FromLanguage
+  toLanguage: Language
   fromText: string
   result: string
   loading: boolean
@@ -25,3 +25,8 @@ export type Action =
   | { type: 'SET_TO_LANGUAGE', payload: Language }
   | { type: 'SET_FROM_TEXT', payload: string }
   | { type: 'SET_RESULT', payload: string }
+
+export enum SectionType {
+  From = 'from',
+  To = 'to'
+}
