@@ -9,6 +9,9 @@ import { ArrowsIcon } from './components/Icons'
 import { LanguageSelector } from './components/LanguageSelector'
 import { SectionType } from './types.d'
 import { TextArea } from './components/TextArea'
+import { translate } from './services/translate'
+import { useEffect } from 'react'
+import { useDebounce } from './hooks/useDebounce'
 
 function App () {
   const {
@@ -23,6 +26,19 @@ function App () {
     setFromText,
     setResult
   } = useStore()
+
+  const debouncedFromText = useDebounce(fromText, 300)
+
+  useEffect(() => {
+    if (debouncedFromText === '') return
+
+    translate({ fromLanguage, toLanguage, text: debouncedFromText })
+      .then(result => {
+        if (result == null) return
+        setResult(result)
+      })
+      .catch(() => { setResult('Error') })
+  }, [debouncedFromText, fromLanguage, toLanguage])
 
   return (
     <Container fluid>
@@ -70,6 +86,8 @@ function App () {
           </Stack>
         </Col>
       </Row>
+
+      {/* <Button onClick={handleTranslate}>Traducir</Button> */}
     </Container>
   )
 }

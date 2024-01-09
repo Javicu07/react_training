@@ -1,7 +1,8 @@
 export const SUPPORTED_LANGUAGES = {
   en: 'English',
-  es: 'Español',
-  de: 'Deutsch'
+  es: 'Spanish',
+  de: 'German',
+  fr: 'French'
 }
 
 export const AUTO_LANGUAGE = 'auto'
