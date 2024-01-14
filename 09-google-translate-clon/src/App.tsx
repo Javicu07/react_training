@@ -27,6 +27,8 @@ function App () {
     setResult
   } = useStore()
 
+  // No necesitamos pasar el tipo <T> a useDebounce porque 'fromText' es de tipo 'string' y typescript
+  // infiere que entonces useDebounce será de tipo 'string' pero es necesario declarar <T> en 'useDebounce.ts'
   const debouncedFromText = useDebounce(fromText, 300)
 
   useEffect(() => {

@@ -20,8 +20,12 @@ function reducer (state: State, action: Action) {
     // Lógica del estado dentro de reducer, de esta forma lo evitamos dentro de los componentes
     if (state.fromLanguage === AUTO_LANGUAGE) return state
 
+    const loading = state.fromText !== ''
+
     return {
       ...state,
+      loading,
+      result: '',
       fromLanguage: state.toLanguage,
       toLanguage: state.fromLanguage
     }
