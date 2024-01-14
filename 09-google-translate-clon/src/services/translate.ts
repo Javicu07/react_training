@@ -39,7 +39,7 @@ export async function translate ({
     const response = await fetch(GET_URL, OPTIONS)
     const { data, status } = await response.json()
     const result = status === 'success'
-      ? data.translatedText
+      ? `${data.translatedText}`
       : `No text translated. Status: ${status}`
     console.log(result)
     return result
