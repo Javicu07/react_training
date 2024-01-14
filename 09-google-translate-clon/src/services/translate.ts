@@ -42,6 +42,7 @@ export async function translate ({
       ? data.translatedText
       : `No text translated. Status: ${status}`
     console.log(result)
+    return result
   } catch (error) {
     console.log(error)
   }
