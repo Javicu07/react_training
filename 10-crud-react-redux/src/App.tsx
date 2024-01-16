@@ -1,10 +1,10 @@
-import { useState } from 'react'
 import './App.css'
+import { ListOfUsers } from './components/ListOfUsers'
 
 function App () {
   return (
     <>
-      <h2>Our project with Redux</h2>
+      <ListOfUsers />
     </>
   )
 }
