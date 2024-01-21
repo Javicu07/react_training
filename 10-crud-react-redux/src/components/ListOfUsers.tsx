@@ -41,7 +41,7 @@ export function ListOfUsers () {
     <Card>
       <Title>
         Usuarios
-        <Badge>{users.length}</Badge>
+        <Badge style={{ marginLeft: '8px' }}>{users.length}</Badge>
       </Title>
       <Table>
         <TableHead>
