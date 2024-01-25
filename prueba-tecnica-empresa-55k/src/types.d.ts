@@ -1,3 +1,10 @@
+// Extender el método cuando no sea reconocible por Typescript
+declare global {
+  interface Array<T> {
+    toSorted(compareFn?: (a: T, b: T) => number): T[]
+  }
+}
+
 export interface APIResults {
   results: User[]
   info: Info

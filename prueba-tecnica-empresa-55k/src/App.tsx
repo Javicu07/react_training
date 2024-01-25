@@ -1,13 +1,19 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 import { UsersList } from './components/UsersList.tsx'
+import { type User } from './types'
 
 function App () {
-  const [users, setUsers] = useState([])
+  const [users, setUsers] = useState<User[]>([])
   const [showColors, setShowColors] = useState(false)
+  const [sortByCountry, setSortByCountry] = useState(false)
 
   const toggleColors = () => {
     setShowColors(!showColors)
+  }
+
+  const toggleSortByCountry = () => {
+    setSortByCountry(prevState => !prevState)
   }
 
   useEffect(() => {
@@ -21,6 +27,17 @@ function App () {
       })
   }, [])
 
+  const sortedUsers = sortByCountry
+    ? users.toSorted((a, b) => { // [...users].sort((a, b)
+      return a.location.country.localeCompare(b.location.country)
+    })
+    : users
+
+  const handleDelete = (email: string) => {
+    const filteredUsers = users.filter((user) => user.email !== email)
+    setUsers(filteredUsers)
+  }
+
   return (
     <>
       <h1>Prueba técnica</h1>
@@ -28,9 +45,12 @@ function App () {
         <button onClick={toggleColors}>
           Colorear filas
         </button>
+        <button onClick={toggleSortByCountry}>
+          {sortByCountry ? 'No ordenar por país' : 'Ordenar por país'}
+        </button>
       </header>
       <main>
-        <UsersList showColors={showColors} users={users}/>
+        <UsersList deleteUser={handleDelete} showColors={showColors} users={sortedUsers}/>
       </main>
     </>
   )
