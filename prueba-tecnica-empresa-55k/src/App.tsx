@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import { UsersList } from './components/UsersList.tsx'
 import { type User } from './types'
@@ -8,6 +8,13 @@ function App () {
   const [showColors, setShowColors] = useState(false)
   const [sortByCountry, setSortByCountry] = useState(false)
 
+  const originalUsers = useRef<User[]>([])
+  // 'useRef' lo usamos para guardar un valor que queremos que se compartan entre renderizados
+  // pero que al cambiar no vuelva a renderizar el componente
+  // 2 diferencias con useState:
+  //   - cuando cambia el ref no vuelve a renderizar el componente
+  //   - para acceder al valor de una referencia y cambiarla tienes que acceder al '.current'
+
   const toggleColors = () => {
     setShowColors(!showColors)
   }
@@ -16,11 +23,16 @@ function App () {
     setSortByCountry(prevState => !prevState)
   }
 
+  const handleReset = () => {
+    setUsers(originalUsers.current)
+  }
+
   useEffect(() => {
     fetch('https://randomuser.me/api/?results=100')
       .then(async res => await res.json())
       .then(res => {
         setUsers(res.results)
+        originalUsers.current = res.results// guardamos en los originalesUsers.current para emplear useRef
       })
       .catch(err => {
         console.error(err)
@@ -47,6 +59,9 @@ function App () {
         </button>
         <button onClick={toggleSortByCountry}>
           {sortByCountry ? 'No ordenar por país' : 'Ordenar por país'}
+        </button>
+        <button onClick={handleReset}>
+          Resetear usuarios
         </button>
       </header>
       <main>
