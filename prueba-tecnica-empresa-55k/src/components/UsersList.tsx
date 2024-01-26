@@ -1,32 +1,30 @@
-import { type User } from '../types.d'
+import { SortBy, type User } from '../types.d'
 
 interface Props {
+  changeSorting: (sort: SortBy) => void
   deleteUser: (email: string) => void
   showColors: boolean
   users: User[]
 }
 
-export function UsersList ({ deleteUser, showColors, users }: Props) {
+export function UsersList ({ changeSorting, deleteUser, showColors, users }: Props) {
   return (
     <table width='100%'>
       <thead>
         <tr>
           <th>Foto</th>
-          <th>Nombre</th>
-          <th>Apellido</th>
-          <th>País</th>
+          <th className='pointer' onClick={() => { changeSorting(SortBy.NAME) }}>Nombre</th>
+          <th className='pointer' onClick={() => { changeSorting(SortBy.LAST) }}>Apellido</th>
+          <th className='pointer' onClick={() => { changeSorting(SortBy.COUNTRY) }}>País</th>
           <th>Acciones</th>
         </tr>
       </thead>
 
-      <tbody>
+      <tbody className={showColors ? 'table-showColors' : 'table'}>
         {
-          users.map((user, index) => {
-            const backgroundColor = index % 2 === 0 ? '#333' : '#555'
-            const color = showColors ? backgroundColor : 'transparent'
-
+          users.map((user) => {
             return (
-              <tr key={user.email} style={{ backgroundColor: color }}>
+              <tr key={user.email}>
                 <td>
                   <img src={user.picture.thumbnail}/>
                 </td>

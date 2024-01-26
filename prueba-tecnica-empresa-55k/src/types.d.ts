@@ -98,6 +98,14 @@ export enum Title {
   Mrs = 'Mrs',
 }
 
+// esto se agrega para ordenar en dependencia del parámetro elegido
+export enum SortBy {
+  NONE = 'none',
+  NAME = 'name',
+  LAST = 'last',
+  COUNTRY = 'country'
+}
+
 export interface Picture {
   large: string
   medium: string
