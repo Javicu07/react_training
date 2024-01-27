@@ -1,38 +1,50 @@
 // instalamos tanstack query para el manejo de estado asíncrono
 // npm install @tanstack/react-query -E ('-E' para instalar la versión exacta)
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import './App.css'
 import { UsersList } from './components/UsersList.tsx'
 import { SortBy, type User } from './types.d'
-import { useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery } from '@tanstack/react-query'
+
+const fetchUsers = async (page: number) => {
+  return await fetch(`https://randomuser.me/api?results=10&seed=javicu&page=${page}`)
+    .then(async res => {
+      if (!res.ok) throw new Error('Error en la petición')
+      return await res.json()
+    })
+    .then(res => {
+      const nextCursor = Number(res.info.page)
+      return {
+        users: res.results,
+        nextCursor
+      }
+    })
+}
 
 function App () {
   // 'useQuery' necesita como mínimo 2 parámetros, 1ro sería la 'key' que se lo tenemos que decir en forma
   // de array y que nos va a permitir recuperar la información desde cualquier sitio, como 2do parámetro
   // tenemos que indicarle como tenemos que recuperar la información
-  useQuery(
-    ['users'], // <-- la key no es una cadena de texto hay que ponerla como un array
-    async () => await fetchUsers(1)
-  )
+  const {
+    isLoading,
+    isError,
+    data,
+    refetch,
+    fetchNextPage,
+    hasNextPage
+  } = useInfiniteQuery<{ nextCursor: number, users: User[] }>({
+    queryKey: ['users'], // <-- la key no es una cadena de texto hay que ponerla como un array
+    queryFn: async () => await fetchUsers(currentPage),
+    getNextPageParam: (lastPage, pages) => lastPage.nextCursor
+  })
 
-  const [users, setUsers] = useState<User[]>([])
   const [showColors, setShowColors] = useState(false)
   const [sorting, setSorting] = useState<SortBy>(SortBy.NONE)
   const [filterCountry, setFilterCountry] = useState<string | null>(null)
 
-  const [loading, setLoading] = useState(false) // estado de carga
-  const [error, setError] = useState(false) // estado de error
-
   // para hacer la paginación necesitamos usar otro estado
   const [currentPage, setCurrentPage] = useState(1) // <-- empezamos con el '1'
-
-  const originalUsers = useRef<User[]>([])
-  // 'useRef' lo usamos para guardar un valor que queremos que se compartan entre renderizados
-  // pero que al cambiar no vuelva a renderizar el componente
-  // 2 diferencias con useState:
-  //   - cuando cambia el ref no vuelve a renderizar el componente
-  //   - para acceder al valor de una referencia y cambiarla tienes que acceder al '.current'
 
   const toggleColors = () => {
     setShowColors(!showColors)
@@ -43,50 +55,10 @@ function App () {
     setSorting(newSortingValue)
   }
 
-  const handleReset = () => {
-    setUsers(originalUsers.current)
+  const handleReset = async () => {
+    await refetch() // vuelve a pedir los datos
+    // setUsers(originalUsers.current)
   }
-
-  useEffect(() => {
-    setLoading(true) // justo antes de hacer el 'fetch' para manejar la carga
-    setError(false) // inicializamos el error a 'false'
-
-    // el concepto de 'seed' (semilla) se utiliza para gestionar la petición siempre desde una semilla
-    // vamos a generar la misma petición desde manera aleatoria, es necesario en la petición poner
-    // una semilla para hacer la paginación y que no varíen los primeros resultados, además en la documentación
-    // de la API indican que hay que poner el Nº de la página
-    fetch(`https://randomuser.me/api?results=10&seed=javicu&page=${currentPage}`)
-      .then(async res => {
-        console.log(res.ok, res.status, res.statusText) // <---datos de la respuesta
-        if (!res.ok) throw new Error('Error en la petición') // manera correcta de manejar los errores
-        return await res.json()
-      }) // si se usa axios, este sí gestiona los errores en el catch
-      .then(res => { // <--- se resulve la promesa
-        setUsers(prevUsers => {
-          const newUsers = prevUsers.concat(res.results)
-          originalUsers.current = newUsers// guardamos en los originalesUsers.current para emplear useRef
-          return newUsers
-        })
-      })
-      .catch(err => { // <--- pillar los errores
-        console.error(err)
-        console.log(users)
-      })
-      .finally(() => { // ´<--- se ejecuta siempre (cuando termina la promesa cambiamos el 'loading' a false)
-        setLoading(false)
-      })
-  }, [currentPage]) // <-- ejecutamos el useEffect cada vez que cambie la paginación
-
-  // Variante de hacerlo con try - catch
-  //  try {
-  //    fetch('https://randomuser.me/api/?results=10')
-  //
-  //    }
-  //  } catch (err) {
-  //    console.log(err)
-  //  } finally {
-  //    setLoading(false)
-  //  }
 
   // con 'useMemo' evitamos tener que ordenar y filtrar los países cada vez que se renderice el componente
   // solo se va a ejecutar cuando cambien las dependencias indicadas
@@ -121,8 +93,8 @@ function App () {
   }, [filteredUsers, sorting])
 
   const handleDelete = (email: string) => {
-    const filteredUsers = users.filter((user) => user.email !== email)
-    setUsers(filteredUsers)
+    // const filteredUsers = users.filter((user) => user.email !== email)
+    // setUsers(filteredUsers)
   }
 
   const handleChangeSort = (sort: SortBy) => {
@@ -158,13 +130,13 @@ function App () {
           />
         }
 
-        {loading && <strong>Cargando ...</strong>}
+        {isLoading && <strong>Cargando ...</strong>}
 
-        {error && <p>Ha ocurrido un error</p>}
+        {isError && <p>Ha ocurrido un error</p>}
 
-        {!error && users.length === 0 && <p>No hay usuarios que mostrar</p>}
+        {!isLoading && !isError && users.length === 0 && <p>No hay usuarios que mostrar</p>}
 
-        {!loading && !error &&
+        {!isLoading && !isError &&
           <button onClick={() => { setCurrentPage(currentPage + 1) }}>Cargar más</button>}
       </main>
     </>
