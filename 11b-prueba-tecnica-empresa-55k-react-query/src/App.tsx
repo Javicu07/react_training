@@ -9,6 +9,12 @@ function App () {
   const [sorting, setSorting] = useState<SortBy>(SortBy.NONE)
   const [filterCountry, setFilterCountry] = useState<string | null>(null)
 
+  const [loading, setLoading] = useState(false) // estado de carga
+  const [error, setError] = useState(false) // estado de error
+
+  // para hacer la paginación necesitamos usar otro estado
+  const [currentPage, setCurrentPage] = useState(1) // <-- empezamos con el '1'
+
   const originalUsers = useRef<User[]>([])
   // 'useRef' lo usamos para guardar un valor que queremos que se compartan entre renderizados
   // pero que al cambiar no vuelva a renderizar el componente
@@ -30,17 +36,45 @@ function App () {
   }
 
   useEffect(() => {
-    fetch('https://randomuser.me/api/?results=100')
-      .then(async res => await res.json())
-      .then(res => {
-        setUsers(res.results)
-        originalUsers.current = res.results// guardamos en los originalesUsers.current para emplear useRef
+    setLoading(true) // justo antes de hacer el 'fetch' para manejar la carga
+    setError(false) // inicializamos el error a 'false'
+
+    // el concepto de 'seed' (semilla) se utiliza para gestionar la petición siempre desde una semilla
+    // vamos a generar la misma petición desde manera aleatoria, es necesario en la petición poner
+    // una semilla para hacer la paginación y que no varíen los primeros resultados, además en la documentación
+    // de la API indican que hay que poner el Nº de la página
+    fetch(`https://randomuser.me/api?results=10&seed=javicu&page=${currentPage}`)
+      .then(async res => {
+        console.log(res.ok, res.status, res.statusText) // <---datos de la respuesta
+        if (!res.ok) throw new Error('Error en la petición') // manera correcta de manejar los errores
+        return await res.json()
+      }) // si se usa axios, este sí gestiona los errores en el catch
+      .then(res => { // <--- se resulve la promesa
+        setUsers(prevUsers => {
+          const newUsers = prevUsers.concat(res.results)
+          originalUsers.current = newUsers// guardamos en los originalesUsers.current para emplear useRef
+          return newUsers
+        })
       })
-      .catch(err => {
+      .catch(err => { // <--- pillar los errores
         console.error(err)
         console.log(users)
       })
-  }, [])
+      .finally(() => { // ´<--- se ejecuta siempre (cuando termina la promesa cambiamos el 'loading' a false)
+        setLoading(false)
+      })
+  }, [currentPage]) // <-- ejecutamos el useEffect cada vez que cambie la paginación
+
+  // Variante de hacerlo con try - catch
+  //  try {
+  //    fetch('https://randomuser.me/api/?results=10')
+  //
+  //    }
+  //  } catch (err) {
+  //    console.log(err)
+  //  } finally {
+  //    setLoading(false)
+  //  }
 
   // con 'useMemo' evitamos tener que ordenar y filtrar los países cada vez que se renderice el componente
   // solo se va a ejecutar cuando cambien las dependencias indicadas
@@ -101,12 +135,25 @@ function App () {
         }} />
       </header>
       <main>
-        <UsersList
-          changeSorting={handleChangeSort}
-          deleteUser={handleDelete}
-          showColors={showColors}
-          users={sortedUsers}
-        />
+        {/* Ponemos este de primero para garabtizar que no desmonte el componente con los primeros usuarios
+        cargados, evitamos problemas de experiencia de usuario y de rendimiento */}
+        {users.length > 0 &&
+          <UsersList
+            changeSorting={handleChangeSort}
+            deleteUser={handleDelete}
+            showColors={showColors}
+            users={sortedUsers}
+          />
+        }
+
+        {loading && <strong>Cargando ...</strong>}
+
+        {error && <p>Ha ocurrido un error</p>}
+
+        {!error && users.length === 0 && <p>No hay usuarios que mostrar</p>}
+
+        {!loading && !error &&
+          <button onClick={() => { setCurrentPage(currentPage + 1) }}>Cargar más</button>}
       </main>
     </>
   )
