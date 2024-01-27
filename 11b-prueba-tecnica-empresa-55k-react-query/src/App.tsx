@@ -1,9 +1,21 @@
+// instalamos tanstack query para el manejo de estado asíncrono
+// npm install @tanstack/react-query -E ('-E' para instalar la versión exacta)
+
 import { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import { UsersList } from './components/UsersList.tsx'
 import { SortBy, type User } from './types.d'
+import { useQuery } from '@tanstack/react-query'
 
 function App () {
+  // 'useQuery' necesita como mínimo 2 parámetros, 1ro sería la 'key' que se lo tenemos que decir en forma
+  // de array y que nos va a permitir recuperar la información desde cualquier sitio, como 2do parámetro
+  // tenemos que indicarle como tenemos que recuperar la información
+  useQuery(
+    ['users'], // <-- la key no es una cadena de texto hay que ponerla como un array
+    async () => await fetchUsers(1)
+  )
+
   const [users, setUsers] = useState<User[]>([])
   const [showColors, setShowColors] = useState(false)
   const [sorting, setSorting] = useState<SortBy>(SortBy.NONE)
