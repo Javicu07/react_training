@@ -1,50 +1,33 @@
 // instalamos tanstack query para el manejo de estado asíncrono
 // npm install @tanstack/react-query -E ('-E' para instalar la versión exacta)
+// las developvers-tools de react query hay que instalarlas aparte:
+// npm install @tanstack/react-query-devtools -E
 
 import { useMemo, useState } from 'react'
 import './App.css'
 import { UsersList } from './components/UsersList.tsx'
-import { SortBy, type User } from './types.d'
-import { useInfiniteQuery } from '@tanstack/react-query'
-
-const fetchUsers = async (page: number) => {
-  return await fetch(`https://randomuser.me/api?results=10&seed=javicu&page=${page}`)
-    .then(async res => {
-      if (!res.ok) throw new Error('Error en la petición')
-      return await res.json()
-    })
-    .then(res => {
-      const nextCursor = Number(res.info.page)
-      return {
-        users: res.results,
-        nextCursor
-      }
-    })
-}
+import { useUsers } from './hooks/useUsers.ts'
+import { type User, SortBy } from './types.d'
+import { Results } from './components/Results.tsx'
 
 function App () {
-  // 'useQuery' necesita como mínimo 2 parámetros, 1ro sería la 'key' que se lo tenemos que decir en forma
-  // de array y que nos va a permitir recuperar la información desde cualquier sitio, como 2do parámetro
-  // tenemos que indicarle como tenemos que recuperar la información
   const {
     isLoading,
     isError,
-    data,
+    users,
     refetch,
     fetchNextPage,
     hasNextPage
-  } = useInfiniteQuery<{ nextCursor: number, users: User[] }>({
-    queryKey: ['users'], // <-- la key no es una cadena de texto hay que ponerla como un array
-    queryFn: async () => await fetchUsers(currentPage),
-    getNextPageParam: (lastPage, pages) => lastPage.nextCursor
-  })
+  } = useUsers()
+
+  // 'flatMap' es un método de array que aplana los elementos de un array, es decir, pone todos los elementos
+  // de un array en un mismo nivel, evita que tengamos varios arrays dentro de un array, poniendo todos
+  // los elementos en 1 solo array.
+  console.log(users)
 
   const [showColors, setShowColors] = useState(false)
   const [sorting, setSorting] = useState<SortBy>(SortBy.NONE)
   const [filterCountry, setFilterCountry] = useState<string | null>(null)
-
-  // para hacer la paginación necesitamos usar otro estado
-  const [currentPage, setCurrentPage] = useState(1) // <-- empezamos con el '1'
 
   const toggleColors = () => {
     setShowColors(!showColors)
@@ -55,8 +38,8 @@ function App () {
     setSorting(newSortingValue)
   }
 
-  const handleReset = async () => {
-    await refetch() // vuelve a pedir los datos
+  const handleReset = () => {
+    void refetch() // vuelve a pedir los datos
     // setUsers(originalUsers.current)
   }
 
@@ -104,6 +87,7 @@ function App () {
   return (
     <>
       <h1>Prueba técnica</h1>
+      <Results />
       <header>
         <button onClick={toggleColors}>
           Colorear filas
@@ -136,11 +120,15 @@ function App () {
 
         {!isLoading && !isError && users.length === 0 && <p>No hay usuarios que mostrar</p>}
 
-        {!isLoading && !isError &&
-          <button onClick={() => { setCurrentPage(currentPage + 1) }}>Cargar más</button>}
+        {!isLoading && !isError && hasNextPage &&
+          <button onClick={ () => { void fetchNextPage() }}>Cargar más</button>}
       </main>
     </>
   )
 }
 
 export default App
+
+// cuando se pone la palabra 'void' todo lo que esté a su derecha devolverá 'undefined', esto se suele
+// emplear para indicar llamadas a funciones que no devuelvan nada (vacío), por ejemplo, si ejecutamos
+// console.log(void 2), esto devolverá undefined por consola
