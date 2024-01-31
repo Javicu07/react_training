@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import { type Question } from '../types.d'
 import confetti from 'canvas-confetti'
 
@@ -7,9 +8,13 @@ interface State {
   currentQuestion: number
   fetchQuestions: (limit: number) => Promise<void>
   selectAnswer: (questionId: number, answerIndex: number) => void
+  goNextQuestion: () => void
+  goPreviousQuestion: () => void
+  reset: () => void
 }
 
-export const useQuestionsStore = create<State>((set, get) => {
+// 'persist' devuelve una función hay que tiparlo con '()' despues de '<State>'
+export const useQuestionsStore = create<State>()(persist((set, get) => {
   return {
     questions: [],
     currentQuestion: 0,
@@ -56,6 +61,21 @@ export const useQuestionsStore = create<State>((set, get) => {
       if (nextQuestion < questions.length) {
         set({ currentQuestion: nextQuestion })
       }
+    },
+
+    goPreviousQuestion: () => {
+      const { currentQuestion } = get()
+      const previousQuestion = currentQuestion - 1
+
+      if (previousQuestion >= 0) {
+        set({ currentQuestion: previousQuestion })
+      }
+    },
+
+    reset: () => {
+      set({ currentQuestion: 0, questions: [] })
     }
   }
-})
+}, {
+  name: 'questions'
+}))
