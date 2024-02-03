@@ -13,6 +13,8 @@ interface State {
   reset: () => void
 }
 
+// leer como hacer 'middleware' en Zustand //
+
 // 'persist' devuelve una función hay que tiparlo con '()' despues de '<State>'
 export const useQuestionsStore = create<State>()(persist((set, get) => {
   return {

@@ -11,7 +11,7 @@ export const useQuestionsData = () => {
     const { userSelectedAnswer, correctAnswer } = question
     if (userSelectedAnswer == null) unanswered++
     if (userSelectedAnswer === correctAnswer) correct++
-    if (userSelectedAnswer !== correctAnswer) incorrect++
+    if (userSelectedAnswer !== correctAnswer && userSelectedAnswer != null) incorrect++
   })
 
   return { correct, incorrect, unanswered }
