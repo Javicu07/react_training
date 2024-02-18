@@ -25,7 +25,18 @@ const mockTodos = [
 
 const App = (): JSX.Element => {
   const [todos, setTodos] = useState(mockTodos)
-  const [filterSelected, setFilterSelected] = useState<FilterValue>(TODO_FILTERS.ALL)
+  const [filterSelected, setFilterSelected] = useState<FilterValue>(() => {
+    // read from url query params using URLSearchParams
+    const params = new URLSearchParams(window.location.search)
+    const filter = params.get('filter') as FilterValue | null
+    if (filter === null) return TODO_FILTERS.ALL
+    // check filter is valid, if not return ALL
+    return Object
+      .values(TODO_FILTERS)
+      .includes(filter)
+      ? filter
+      : TODO_FILTERS.ALL
+  })
 
   const handleRemove = ({ id }: TodoId): void => {
     const newTodos = todos.filter(todo => todo.id !== id)
