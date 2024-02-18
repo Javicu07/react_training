@@ -7,17 +7,17 @@ interface Props {
 }
 
 export const Filters: React.FC<Props> = ({ filterSelected, handleFilterChange }) => {
+  const handleClick = (filter: FilterValue) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault()
+    handleFilterChange(filter)
+  }
+
   return (
     <ul className="filters">
       {
         Object.entries(FILTERS_BUTTONS).map(([key, { href, literal }]) => {
           const isSelected = key === filterSelected
           const filterClassName = isSelected ? 'selected' : ''
-
-          const handleClick = (filter: FilterValue) => (e: React.MouseEvent<HTMLAnchorElement>) => {
-            e.preventDefault()
-            handleFilterChange(filter)
-          }
 
           return (
             <li key={key}>
